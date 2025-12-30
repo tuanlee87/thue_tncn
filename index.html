@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tính Thuế TNCN 2026</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 40px;
+    }
+
+    .container {
+      max-width: 420px;
+      margin: auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 14px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    .result {
+      margin-top: 20px;
+      background: #f1f3f5;
+      padding: 14px;
+      border-radius: 6px;
+    }
+
+    .result p {
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Tính Thuế TNCN 2026</h1>
+
+  <label>Thu nhập tháng (VND)</label>
+  <input type="number" id="income" placeholder="Ví dụ: 25000000">
+
+  <label>Số người phụ thuộc</label>
+  <input type="number" id="dependents" value="0">
+
+  <button onclick="calculateTax()">Tính thuế</button>
+
+  <div class="result" id="result" style="display:none;">
+    <p><strong>Thuế TNCN / tháng:</strong> <span id="taxMonth"></span></p>
+    <p><strong>Thuế TNCN / năm:</strong> <span id="taxYear"></span></p>
+    <p><strong>Thu nhập thực nhận:</strong> <span id="netIncome"></span></p>
+  </div>
+</div>
+
+<script>
+  function calculateTax() {
+    const income = Number(document.getElementById("income").value);
+    const dependents = Number(document.getElementById("dependents").value);
+
+    if (!income || income <= 0) {
+      alert("Vui lòng nhập thu nhập hợp lệ");
+      return;
+    }
+
+    // Thông số 2026
+    const insuranceRate = 0.105; // 10.5%
+    const personalDeduction = 15.5; // triệu
+    const dependentDeduction = 6.2; // triệu
+
+    // Thu nhập sau bảo hiểm (triệu)
+    const incomeAfterInsurance = income * (1 - insuranceRate) / 1_000_000;
+
+    // Thu nhập tính thuế
+    let taxableIncome =
+      incomeAfterInsurance
+      - personalDeduction
+      - dependents * dependentDeduction;
+
+    if (taxableIncome <= 0) taxableIncome = 0;
+
+    // Biểu thuế lũy tiến 2026
+    const brackets = [
+      { limit: 10, rate: 0.05 },
+      { limit: 30, rate: 0.10 },
+      { limit: 60, rate: 0.20 },
+      { limit: 100, rate: 0.30 },
+      { limit: Infinity, rate: 0.35 }
+    ];
+
+    let tax = 0;
+    let prevLimit = 0;
+
+    for (const b of brackets) {
+      if (taxableIncome > prevLimit) {
+        const taxablePart = Math.min(taxableIncome, b.limit) - prevLimit;
+        tax += taxablePart * b.rate;
+        prevLimit = b.limit;
+      } else {
+        break;
+      }
+    }
+
+    // Quy đổi về VND
+    const taxMonth = tax * 1_000_000;
+    const taxYear = taxMonth * 12;
+    const netIncome =
+      income - income * insuranceRate - taxMonth;
+
+    document.getElementById("taxMonth").innerText =
+      taxMonth.toLocaleString("vi-VN") + " VND";
+    document.getElementById("taxYear").innerText =
+      taxYear.toLocaleString("vi-VN") + " VND";
+    document.getElementById("netIncome").innerText =
+      netIncome.toLocaleString("vi-VN") + " VND";
+
+    document.getElementById("result").style.display = "block";
+  }
+</script>
+
+</body>
+</html>
