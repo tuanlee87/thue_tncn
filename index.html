@@ -1,75 +1,146 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tính Thuế TNCN 2026</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      padding: 40px;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tính thuế TNCN 2025 - 2026</title>
 
-    .container {
-      max-width: 420px;
-      margin: auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+<style>
+:root {
+  --primary: #2563eb;
+  --bg: #f3f4f6;
+  --card: #ffffff;
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont;
+  background: var(--bg);
+  margin: 0;
+  padding: 16px;
+}
 
-    label {
-      display: block;
-      margin-top: 14px;
-      font-weight: bold;
-    }
+.container {
+  max-width: 520px;
+  margin: auto;
+  background: var(--card);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.08);
+}
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
+h1 {
+  text-align: center;
+  margin-bottom: 16px;
+}
 
-    button {
-      width: 100%;
-      margin-top: 20px;
-      padding: 12px;
-      font-size: 16px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+label {
+  font-weight: 600;
+  margin-top: 12px;
+  display: block;
+}
 
-    button:hover {
-      background: #0056b3;
-    }
+input[type="number"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 16px;
+}
 
-    .result {
-      margin-top: 20px;
-      background: #f1f3f5;
-      padding: 14px;
-      border-radius: 6px;
-    }
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
 
-    .result p {
-      margin: 6px 0;
-    }
-  </style>
+.toggle input {
+  width: 20px;
+  height: 20px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button.secondary {
+  background: #374151;
+}
+
+button:hover {
+  opacity: .9;
+}
+
+.result {
+  margin-top: 20px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 10px;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.card h3 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+p {
+  margin: 6px 0;
+}
+
+.footer-btns {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+@media (max-width: 480px) {
+  .compare {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print */
+@media print {
+  body {
+    background: white;
+  }
+  button, .footer-btns {
+    display: none;
+  }
+  .container {
+    box-shadow: none;
+  }
+}
+</style>
 </head>
+
 <body>
 
 <div class="container">
-  <h1>Tính Thuế TNCN 2026</h1>
+  <h1>💰 Tính Thuế TNCN</h1>
 
   <label>Thu nhập tháng (VND)</label>
   <input type="number" id="income" placeholder="Ví dụ: 25000000">
@@ -77,78 +148,130 @@
   <label>Số người phụ thuộc</label>
   <input type="number" id="dependents" value="0">
 
-  <button onclick="calculateTax()">Tính thuế</button>
+  <div class="toggle">
+    <input type="checkbox" id="insurance" checked>
+    <label for="insurance">Có đóng bảo hiểm (10.5%)</label>
+  </div>
+
+  <button onclick="calculate()">Tính thuế & so sánh</button>
 
   <div class="result" id="result" style="display:none;">
-    <p><strong>Thuế TNCN / tháng:</strong> <span id="taxMonth"></span></p>
-    <p><strong>Thuế TNCN / năm:</strong> <span id="taxYear"></span></p>
-    <p><strong>Thu nhập thực nhận:</strong> <span id="netIncome"></span></p>
+    <div class="compare">
+      <div class="card">
+        <h3>📅 Năm 2025</h3>
+        <p>Thuế / tháng: <strong id="tax2025"></strong></p>
+        <p>Thuế / năm: <strong id="tax2025y"></strong></p>
+      </div>
+
+      <div class="card">
+        <h3>📅 Năm 2026</h3>
+        <p>Thuế / tháng: <strong id="tax2026"></strong></p>
+        <p>Thuế / năm: <strong id="tax2026y"></strong></p>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <p>Thu nhập thực nhận (2026): <strong id="netIncome"></strong></p>
+      <p>Chênh lệch thuế: <strong id="diff"></strong></p>
+    </div>
+
+    <div class="footer-btns">
+      <button class="secondary" onclick="window.print()">🖨 In / Xuất PDF</button>
+    </div>
   </div>
 </div>
 
 <script>
-  function calculateTax() {
-    const income = Number(document.getElementById("income").value);
-    const dependents = Number(document.getElementById("dependents").value);
-
-    if (!income || income <= 0) {
-      alert("Vui lòng nhập thu nhập hợp lệ");
-      return;
+function calcTax(taxable, brackets) {
+  let tax = 0, prev = 0;
+  for (const b of brackets) {
+    if (taxable > prev) {
+      tax += (Math.min(taxable, b.limit) - prev) * b.rate;
+      prev = b.limit;
     }
-
-    // Thông số 2026
-    const insuranceRate = 0.105; // 10.5%
-    const personalDeduction = 15.5; // triệu
-    const dependentDeduction = 6.2; // triệu
-
-    // Thu nhập sau bảo hiểm (triệu)
-    const incomeAfterInsurance = income * (1 - insuranceRate) / 1_000_000;
-
-    // Thu nhập tính thuế
-    let taxableIncome =
-      incomeAfterInsurance
-      - personalDeduction
-      - dependents * dependentDeduction;
-
-    if (taxableIncome <= 0) taxableIncome = 0;
-
-    // Biểu thuế lũy tiến 2026
-    const brackets = [
-      { limit: 10, rate: 0.05 },
-      { limit: 30, rate: 0.10 },
-      { limit: 60, rate: 0.20 },
-      { limit: 100, rate: 0.30 },
-      { limit: Infinity, rate: 0.35 }
-    ];
-
-    let tax = 0;
-    let prevLimit = 0;
-
-    for (const b of brackets) {
-      if (taxableIncome > prevLimit) {
-        const taxablePart = Math.min(taxableIncome, b.limit) - prevLimit;
-        tax += taxablePart * b.rate;
-        prevLimit = b.limit;
-      } else {
-        break;
-      }
-    }
-
-    // Quy đổi về VND
-    const taxMonth = tax * 1_000_000;
-    const taxYear = taxMonth * 12;
-    const netIncome =
-      income - income * insuranceRate - taxMonth;
-
-    document.getElementById("taxMonth").innerText =
-      taxMonth.toLocaleString("vi-VN") + " VND";
-    document.getElementById("taxYear").innerText =
-      taxYear.toLocaleString("vi-VN") + " VND";
-    document.getElementById("netIncome").innerText =
-      netIncome.toLocaleString("vi-VN") + " VND";
-
-    document.getElementById("result").style.display = "block";
   }
+  return tax;
+}
+
+function calculate() {
+  const income = Number(incomeInput.value);
+  const dependents = Number(dependentsInput.value);
+  const hasInsurance = insurance.checked;
+
+  if (income <= 0) {
+    alert("Vui lòng nhập thu nhập hợp lệ");
+    return;
+  }
+
+  const insuranceRate = hasInsurance ? 0.105 : 0;
+  const afterInsurance = income * (1 - insuranceRate) / 1_000_000;
+
+  // ==== 2025 ====
+  const taxable2025 = Math.max(
+    afterInsurance - 11 - dependents * 4.4,
+    0
+  );
+
+  const brackets2025 = [
+    {limit:5, rate:0.05},
+    {limit:10, rate:0.10},
+    {limit:18, rate:0.15},
+    {limit:32, rate:0.20},
+    {limit:52, rate:0.25},
+    {limit:80, rate:0.30},
+    {limit:Infinity, rate:0.35},
+  ];
+
+  const tax2025 = calcTax(taxable2025, brackets2025);
+
+  // ==== 2026 ====
+  const taxable2026 = Math.max(
+    afterInsurance - 15.5 - dependents * 6.2,
+    0
+  );
+
+  const brackets2026 = [
+    {limit:10, rate:0.05},
+    {limit:30, rate:0.10},
+    {limit:60, rate:0.20},
+    {limit:100, rate:0.30},
+    {limit:Infinity, rate:0.35},
+  ];
+
+  const tax2026 = calcTax(taxable2026, brackets2026);
+
+  // VND
+  const t25 = tax2025 * 1_000_000;
+  const t26 = tax2026 * 1_000_000;
+
+  tax2025El.innerText = t25.toLocaleString("vi-VN") + " đ";
+  tax2025y.innerText = (t25*12).toLocaleString("vi-VN") + " đ";
+  tax2026El.innerText = t26.toLocaleString("vi-VN") + " đ";
+  tax2026y.innerText = (t26*12).toLocaleString("vi-VN") + " đ";
+
+  netIncome.innerText =
+    (income - income*insuranceRate - t26)
+      .toLocaleString("vi-VN") + " đ";
+
+  diff.innerText =
+    (t25 - t26 >= 0 ? "Giảm " : "Tăng ")
+    + Math.abs(t25 - t26).toLocaleString("vi-VN") + " đ";
+
+  result.style.display = "block";
+}
+
+// shortcuts
+const incomeInput = document.getElementById("income");
+const dependentsInput = document.getElementById("dependents");
+const insurance = document.getElementById("insurance");
+const result = document.getElementById("result");
+
+const tax2025El = document.getElementById("tax2025");
+const tax2025y = document.getElementById("tax2025y");
+const tax2026El = document.getElementById("tax2026");
+const tax2026y = document.getElementById("tax2026y");
+const netIncome = document.getElementById("netIncome");
+const diff = document.getElementById("diff");
 </script>
 
 </body>
